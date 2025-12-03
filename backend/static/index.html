@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>LanceDB RAG Bot</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:24px auto;padding:0 12px}
+    #chat{border:1px solid #ddd;padding:12px;min-height:360px;overflow:auto;background:#fff}
+    .msg{margin-bottom:14px}
+    .user{color:#0b63d6}
+    .bot{color:#111}
+    small{color:#666}
+    textarea{width:100%;box-sizing:border-box}
+    button{margin-top:8px;padding:8px 12px}
+  </style>
+</head>
+<body>
+  <h2>LanceDB RAG Bot — Demo</h2>
+  <div id="chat"></div>
+  <textarea id="q" rows="4" placeholder="Ask something..."></textarea><br/>
+  <button id="send">Send</button>
+  <script>
+    const chat = document.getElementById('chat');
+    const q = document.getElementById('q');
+    document.getElementById('send').onclick = async () => {
+      const query = q.value.trim(); if(!query) return;
+      append('User', query, 'user');
+      q.value = '';
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({query, n_results:5})
+        });
+        const data = await res.json();
+        append('Bot', data.answer + '\n\nSources: ' + (data.sources || []).join(', '), 'bot');
+      } catch (err) {
+        append('Bot', 'Error: ' + (err.message || err), 'bot');
+      }
+    };
+    function append(who, text, cls){
+      const d = document.createElement('div'); d.className='msg';
+      d.innerHTML = `<b class="${cls}">${who}:</b><div>${escapeHtml(text).replace(/\n/g,'<br/>')}</div>`;
+      chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+    }
+    function escapeHtml(t){ return t.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  </script>
+</body>
+</html>
