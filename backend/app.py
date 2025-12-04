@@ -1,5 +1,6 @@
 # app.py
 import os
+import sys
 import torch
 import lancedb
 from fastapi import FastAPI
@@ -8,12 +9,13 @@ from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 import numpy as np
 
-# Initialize free models
-print("Loading embedding model...")
-embedding_model = SentenceTransformer('paraphrase-MiniLM-L3-v2')  # Smaller model
+# Import configuration
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import EMBEDDING_MODEL, DB_DIR, COLLECTION_NAME, DEFAULT_N_RESULTS
 
-DB_DIR = "lancedb_store"
-COLLECTION_NAME = "docs"
+# Initialize free models
+print(f"Loading embedding model: {EMBEDDING_MODEL}...")
+embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 
 app = FastAPI()
 
@@ -62,9 +64,10 @@ async def chat(q: QueryIn):
     # embed query using sentence transformers
     emb = embedding_model.encode(q.query).tolist()
 
-    # vector search
+    # vector search - specify the embedding column
     results = (
         table.search(emb)
+        .metric("cosine")
         .limit(q.n_results)
         .select(["id", "text", "metadata"])
         .to_list()

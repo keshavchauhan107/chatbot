@@ -6,19 +6,20 @@ from sentence_transformers import SentenceTransformer
 from PyPDF2 import PdfReader
 import lancedb
 import numpy as np
+import sys
 
-# Initialize free embedding model
-print("Loading embedding model...")
-embedding_model = SentenceTransformer('paraphrase-MiniLM-L3-v2')  # Smaller model
+# Import configuration
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import (
+    EMBEDDING_MODEL, EMBED_DIM, DB_DIR, COLLECTION_NAME,
+    CHUNK_SIZE, CHUNK_OVERLAP, BATCH_SIZE
+)
 
 DATA_DIR = "data"
-DB_DIR = "lancedb_store"
-COLLECTION_NAME = "docs"
 
-CHUNK_SIZE = 900
-CHUNK_OVERLAP = 150
-BATCH_SIZE = 32
-EMBED_DIM = 384  # Dimension for all-MiniLM-L6-v2 model
+# Initialize free embedding model
+print(f"Loading embedding model: {EMBEDDING_MODEL}...")
+embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 
 
 def read_text_file(path):
@@ -108,7 +109,7 @@ def main():
                 pa.field("path", pa.string()),
                 pa.field("chunk", pa.int64())
             ])),
-            pa.field("embedding", pa.list_(pa.float32(), EMBED_DIM))
+            pa.field("vector", pa.list_(pa.float32(), EMBED_DIM))
         ])
         table = db.create_table(COLLECTION_NAME, schema=schema)
 
@@ -119,7 +120,7 @@ def main():
             "id": ids[i],
             "text": docs[i],
             "metadata": metas[i],
-            "embedding": embeddings[i],
+            "vector": embeddings[i],
         })
 
     table.add(batch_rows)

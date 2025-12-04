@@ -171,3 +171,6 @@ data/*.tar.gz
 data/*.pdf
 data/*.csv
 !data/sample_doc.txt
+
+# Vector DBs
+lancedb_store/
