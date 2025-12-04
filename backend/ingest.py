@@ -10,7 +10,7 @@ import sys
 
 # Import configuration
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import (
+from backend.config.model_config import (
     EMBEDDING_MODEL, EMBED_DIM, DB_DIR, COLLECTION_NAME,
     CHUNK_SIZE, CHUNK_OVERLAP, BATCH_SIZE
 )

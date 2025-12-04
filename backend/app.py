@@ -11,7 +11,7 @@ import numpy as np
 
 # Import configuration
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import EMBEDDING_MODEL, DB_DIR, COLLECTION_NAME, DEFAULT_N_RESULTS
+from backend.config.model_config import EMBEDDING_MODEL, DB_DIR, COLLECTION_NAME, DEFAULT_N_RESULTS
 
 # Initialize free models
 print(f"Loading embedding model: {EMBEDDING_MODEL}...")
